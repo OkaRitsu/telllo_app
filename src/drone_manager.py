@@ -19,9 +19,7 @@ DEFAULT_DISTANCE = 0.25
 DEFAULT_SPEED = 10
 DEFAULT_DEGREE = 30
 
-# 動画の縦横（処理時間を考慮して３分の1に）
-# FRAME_X = int(960/3)
-# FRAME_Y = int(720/3)
+# 動画の縦横
 FRAME_X = 960
 FRAME_Y = 720
 FRAME_AREA = FRAME_X * FRAME_Y
@@ -87,6 +85,17 @@ class DroneManeger(metaclass=Singleton):
         )
         self._receive_video_thread.start()
 
+        # ドローンの状態を受信するスレッド
+        self.state_port = 8890
+        self.state_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.state_socket.bind((self.host_ip, self.state_port))
+        self.state = None
+        self._state_thread = threading.Thread(
+            target=self.receive_state,
+            args=(self.stop_event, )
+        )
+        self._state_thread.start()
+
         # コマンドを何個も送らないようにする
         self._command_semaphore = threading.Semaphore(1)
         self._command_thread = None
@@ -139,7 +148,11 @@ class DroneManeger(metaclass=Singleton):
         )
         self._command_thread.start()
 
-    def _send_command(self, command: str, blocking: bool = True) -> Optional[str]:
+    def _send_command(
+            self,
+            command: str,
+            blocking: bool = True
+    ) -> Optional[str]:
         is_acquire = self._command_semaphore.acquire(blocking=blocking)
         if is_acquire:
             with contextlib.ExitStack() as stack:
@@ -177,15 +190,15 @@ class DroneManeger(metaclass=Singleton):
                 'status': 'not_acquire'
             })
 
-    def takeoff(self):
+    def takeoff(self) -> Optional[str]:
         """離陸させる"""
         return self.send_command('takeoff')
 
-    def land(self):
+    def land(self) -> Optional[str]:
         """着陸させる"""
         return self.send_command('land')
 
-    def move(self, direction: str, distance: float):
+    def move(self, direction: str, distance: float) -> Optional[str]:
         """方向と距離を指定して動かす
 
         Atributes:
@@ -195,31 +208,31 @@ class DroneManeger(metaclass=Singleton):
         distance = int(round(distance * 100))
         return self.send_command(f'{direction} {distance}')
 
-    def up(self, distance: int = DEFAULT_DISTANCE):
+    def up(self, distance: int = DEFAULT_DISTANCE) -> Optional[str]:
         """上昇させる"""
         return self.move('up', distance)
 
-    def down(self, distance: int = DEFAULT_DISTANCE):
+    def down(self, distance: int = DEFAULT_DISTANCE) -> Optional[str]:
         """下降させる"""
         return self.move('down', distance)
 
-    def left(self, distance: int = DEFAULT_DISTANCE):
+    def left(self, distance: int = DEFAULT_DISTANCE) -> Optional[str]:
         """左移動させる"""
         return self.move('left', distance)
 
-    def right(self, distance: int = DEFAULT_DISTANCE):
+    def right(self, distance: int = DEFAULT_DISTANCE) -> Optional[str]:
         """右移動させる"""
         return self.move('right', distance)
 
-    def forward(self, distance: int = DEFAULT_DISTANCE):
+    def forward(self, distance: int = DEFAULT_DISTANCE) -> Optional[str]:
         """前進させる"""
         return self.move('forward', distance)
 
-    def back(self, distance: int = DEFAULT_DISTANCE):
+    def back(self, distance: int = DEFAULT_DISTANCE) -> Optional[str]:
         """後進させる"""
         return self.move('back', distance)
 
-    def turn(self, direction: str, degree: int):
+    def turn(self, direction: str, degree: int) -> Optional[str]:
         """回転させる
 
         Attributes:
@@ -228,15 +241,15 @@ class DroneManeger(metaclass=Singleton):
         """
         return self.send_command(f'{direction} {degree}')
 
-    def turn_left(self, degree: int = DEFAULT_DEGREE):
+    def turn_left(self, degree: int = DEFAULT_DEGREE) -> Optional[str]:
         """反時計回りに回転させる"""
         return self.turn('ccw', degree)
 
-    def turn_right(self, degree: int = DEFAULT_DEGREE):
+    def turn_right(self, degree: int = DEFAULT_DEGREE) -> Optional[str]:
         """時計回りに回転させる"""
         return self.turn('cw', degree)
 
-    def set_speed(self, speed: int):
+    def set_speed(self, speed: int) -> Optional[str]:
         """速度を設定する
 
         Attributes:
@@ -250,12 +263,12 @@ class DroneManeger(metaclass=Singleton):
         pipe_in,
         host_ip: str,
         video_port: int,
-    ):
+    ) -> None:
         """ソケットをつないで，動画を受けとる
 
         Arguments:
-            stop_envent:
-            pipe_in:
+            stop_envent: スレッドを止めるイベント
+            pipe_in: 受け取った動画を入力するパイプ
             host_ip: ホストのIPアドレス
             video_port: 動画用のポート
         """
@@ -302,6 +315,7 @@ class DroneManeger(metaclass=Singleton):
                     break
 
     def video_binary_generator(self) -> Generator[np.ndarray, None, None]:
+        """ソケットから受け取ったバイナリフレームを処理しやすい形に変換"""
         while True:
             try:
                 frame = self.proc_stdout.read(FRAME_SIZE)
@@ -322,9 +336,48 @@ class DroneManeger(metaclass=Singleton):
 
             yield frame
 
-    def video_jpeg_generator(self):
+    def video_jpeg_generator(self) -> Generator[np.ndarray, None, None]:
+        """画像をjpeg形式にエンコード"""
         for frame in self.video_binary_generator():
+            frame = self._process_frame(frame)
             _, jpeg = cv2.imencode('.jpg', frame)
             jpeg_binary = jpeg.tobytes()
 
             yield jpeg_binary
+
+    def _process_frame(self, frame: np.ndarray) -> np.ndarray:
+        """画像を解析して結果を反映させる
+
+        Atributes:
+            frame: 対象のRGB画像
+        Returns:
+            受け取ったフレームの解析結果
+        """
+        return frame
+
+    def receive_state(self, stop_event: threading.Event) -> None:
+        """ドローンの速度，高度，バッテリーなどの情報を取得する"""
+        while not stop_event.is_set():
+            try:
+                byte_state, ip = self.state_socket.recvfrom(3000)
+                # バイト列を文字列に変換
+                str_state = byte_state.decode('utf-8')
+                # 文字列を辞書に変換
+                result = {}
+                for item in str_state.split(';'):
+                    if ':' not in item or item is None:
+                        continue
+                    k, v = item.split(':')
+                    result[k] = float(v)
+                self.state = result
+
+                # logger.info({
+                #     'action': 'receive_state',
+                #     'state': self.state
+                # })
+            except socket.error as ex:
+                logger.error({
+                    'action': 'receive_state',
+                    'exception': ex
+                })
+                break
