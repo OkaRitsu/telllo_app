@@ -85,6 +85,17 @@ class DroneManeger(metaclass=Singleton):
         )
         self._receive_video_thread.start()
 
+        # ドローンの状態を受信するスレッド
+        self.state_port = 8890
+        self.state_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.state_socket.bind((self.host_ip, self.state_port))
+        self.state = None
+        self._state_thread = threading.Thread(
+            target=self.receive_state,
+            args=(self.stop_event, )
+        )
+        self._state_thread.start()
+
         # コマンドを何個も送らないようにする
         self._command_semaphore = threading.Semaphore(1)
         self._command_thread = None
@@ -343,3 +354,30 @@ class DroneManeger(metaclass=Singleton):
             受け取ったフレームの解析結果
         """
         return frame
+
+    def receive_state(self, stop_event: threading.Event) -> None:
+        """ドローンの速度，高度，バッテリーなどの情報を取得する"""
+        while not stop_event.is_set():
+            try:
+                byte_state, ip = self.state_socket.recvfrom(3000)
+                # バイト列を文字列に変換
+                str_state = byte_state.decode('utf-8')
+                # 文字列を辞書に変換
+                result = {}
+                for item in str_state.split(';'):
+                    if ':' not in item or item is None:
+                        continue
+                    k, v = item.split(':')
+                    result[k] = float(v)
+                self.state = result
+
+                # logger.info({
+                #     'action': 'receive_state',
+                #     'state': self.state
+                # })
+            except socket.error as ex:
+                logger.error({
+                    'action': 'receive_state',
+                    'exception': ex
+                })
+                break
