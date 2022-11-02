@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title %}{% endblock %}</title>
+        <link rel="stylesheet" href="/static/node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/node_modules/bootstrap-icons/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="/static/css/style.css">
+    </head>
+    <body>
+        <script src="/static/node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
+        <script src="/static/node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
+
+        <div class="container-fluid">
+
+            <nav class="navbar navbar-dark bg-primary">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="/">⌘TELLO</a>
+                </div>
+            </nav>
+
+            {% block content %}{% endblock %}
+
+        </div>
+    </body>
+</html>

@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+
+{% block title %}TELLO controller{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card mt-3">
+        <h3 class="card-header">Controller</h5>
+        <div class="card-body">
+            <div class="row">
+                <!--左スティック-->
+                <div class="col">
+                    <div class="container-fluid text-center">
+                        <div class="row">
+                            <div class="col align-self-center">
+                                <button type="button" class="btn btn-primary"><i class="bi bi-chevron-double-up"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container text-center">
+                        <div class="row">
+                            <div class="col align-self-start">
+                                <button type="button" class="btn btn-primary"><i class="bi bi-arrow-clockwise"></i></button>
+                            </div>
+                            <div class="col align-self-end">
+                                <button type="button" class="btn btn-primary"><i class="bi bi-arrow-counterclockwise"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container text-center">
+                        <div class="row">
+                            <div class="col align-self-center">
+                                <button type="button" class="btn btn-primary"><i class="bi bi-chevron-double-down"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--離陸・着陸-->
+                <div class="col">
+                    <div class="container-fluid">
+                        <div class="container text-center">
+                            <div class="col align-self-center">
+                                <button type="button" class="btn btn-primary">Take Off</button>
+                            </div>
+                        </div>
+                        <div class="container text-center">
+                            <br>
+                        </div>
+                        <div class="container text-center">
+                            <div class="row">
+                                <div class="col align-self-center">
+                                    <button type="button" class="btn btn-primary">Land</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--右スティック-->
+                <div class="col">
+                    <div class="container-fluid">
+                        <div class="container text-center">
+                            <div class="row">
+                                <div class="col align-self-center">
+                                <button type="button" class="btn btn-primary"><i class="bi bi-arrow-up"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="container text-center">
+                            <div class="row">
+                                <div class="col align-self-start">
+                                    <button type="button" class="btn btn-primary"><i class="bi bi-arrow-left"></i></button>
+                                </div>
+                                <div class="col align-self-end">
+                                    <button type="button" class="btn btn-primary"><i class="bi bi-arrow-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="container text-center">
+                            <div class="row">
+                                <div class="col align-self-center">
+                                    <button type="button" class="btn btn-primary"><i class="bi bi-arrow-down"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-2 p-2">
+        <h3 class="card-header">Drone Camera</h5>
+        <div class="card-body">
+            <!--ドローンカメラ映像-->
+            <img src="/video/streaming">
+        </div>
+    </div>
+</div>
+{% endblock %}
