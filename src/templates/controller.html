@@ -3,6 +3,16 @@
 {% block title %}TELLO controller{% endblock %}
 
 {% block content %}
+<script>
+    function sendCommand(command, params={}) {
+        console.log({action: 'sendCommand', command: command, params: params});
+        params['command'] = command;
+        $.post("/api/command/", params).done(function (json) {
+            console.log({action: 'sendCommand', json: json});
+        }, 'json')
+    }
+</script>
+
 <div class="container-fluid">
     <div class="card mt-3">
         <h3 class="card-header">Controller</h5>
@@ -13,24 +23,36 @@
                     <div class="container-fluid text-center">
                         <div class="row">
                             <div class="col align-self-center">
-                                <button type="button" class="btn btn-primary"><i class="bi bi-chevron-double-up"></i></button>
+                                <a class="btn btn-primary" href="#"
+                                    onclick="sendCommand('up'); return false;">
+                                    <i class="bi bi-chevron-double-up"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
                     <div class="container text-center">
                         <div class="row">
                             <div class="col align-self-start">
-                                <button type="button" class="btn btn-primary"><i class="bi bi-arrow-clockwise"></i></button>
+                                <a class="btn btn-primary" href="#"
+                                    onclick="sendCommand('turnLeft'); return false;">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </a>
                             </div>
                             <div class="col align-self-end">
-                                <button type="button" class="btn btn-primary"><i class="bi bi-arrow-counterclockwise"></i></button>
+                                <a class="btn btn-primary" href="#"
+                                    onclick="sendCommand('turnRight'); return false;">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
                     <div class="container text-center">
                         <div class="row">
                             <div class="col align-self-center">
-                                <button type="button" class="btn btn-primary"><i class="bi bi-chevron-double-down"></i></button>
+                                <a class="btn btn-primary" href="#"
+                                    onclick="sendCommand('down'); return false;">
+                                    <i class="bi bi-chevron-double-down"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -40,7 +62,8 @@
                     <div class="container-fluid">
                         <div class="container text-center">
                             <div class="col align-self-center">
-                                <button type="button" class="btn btn-primary">Take Off</button>
+                                <a class="btn btn-primary" href="#"
+                                    onclick="sendCommand('takeOff'); return false;">Take Off</a>
                             </div>
                         </div>
                         <div class="container text-center">
@@ -49,7 +72,8 @@
                         <div class="container text-center">
                             <div class="row">
                                 <div class="col align-self-center">
-                                    <button type="button" class="btn btn-primary">Land</button>
+                                    <a class="btn btn-primary" href="#"
+                                        onclick="sendCommand('land'); return false;">Land</a>
                                 </div>
                             </div>
                         </div>
@@ -61,24 +85,36 @@
                         <div class="container text-center">
                             <div class="row">
                                 <div class="col align-self-center">
-                                <button type="button" class="btn btn-primary"><i class="bi bi-arrow-up"></i></button>
+                                    <a class="btn btn-primary" href="#"
+                                        onclick="sendCommand('forward'); return false;">
+                                        <i class="bi bi-arrow-up"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                         <div class="container text-center">
                             <div class="row">
                                 <div class="col align-self-start">
-                                    <button type="button" class="btn btn-primary"><i class="bi bi-arrow-left"></i></button>
+                                    <a class="btn btn-primary" href="#"
+                                        onclick="sendCommand('left'); return false;">
+                                        <i class="bi bi-arrow-left"></i>
+                                    </a>
                                 </div>
                                 <div class="col align-self-end">
-                                    <button type="button" class="btn btn-primary"><i class="bi bi-arrow-right"></i></button>
+                                    <a class="btn btn-primary" href="#"
+                                        onclick="sendCommand('right'); return false;">
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                         <div class="container text-center">
                             <div class="row">
                                 <div class="col align-self-center">
-                                    <button type="button" class="btn btn-primary"><i class="bi bi-arrow-down"></i></button>
+                                    <a class="btn btn-primary" href="#"
+                                        onclick="sendCommand('back'); return false;">
+                                        <i class="bi bi-arrow-down"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
