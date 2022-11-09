@@ -14,107 +14,97 @@
 </script>
 
 <div class="container-fluid">
-    <div class="card mt-3">
-        <h3 class="card-header">Controller</h5>
-        <div class="card-body">
-            <div class="row">
-                <!--左スティック-->
-                <div class="col">
-                    <div class="container-fluid text-center">
-                        <div class="row">
-                            <div class="col align-self-center">
-                                <a class="btn btn-primary" href="#"
-                                    onclick="sendCommand('up'); return false;">
-                                    <i class="bi bi-chevron-double-up"></i>
-                                </a>
-                            </div>
-                        </div>
+    <div class="row align-items-start">
+        <div class="col">
+            <div class="card mt-3">
+                <h3 class="card-header">Controller</h5>
+                <div class="card-body">
+                    <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                        <a class="btn btn-primary" href="#"
+                            onclick="sendCommand('takeOff'); return false;">Take Off</a>
+                        <a class="btn btn-primary" href="#"
+                            onclick="sendCommand('land'); return false;">Land</a>
                     </div>
-                    <div class="container text-center">
-                        <div class="row">
-                            <div class="col align-self-start">
-                                <a class="btn btn-primary" href="#"
-                                    onclick="sendCommand('turnLeft'); return false;">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </a>
+                    <br>
+                    <br>
+                    <div class="row">
+                        <!--左スティック-->
+                        <div class="col">
+                            <div class="container-fluid text-center">
+                                <div class="row">
+                                    <div class="col align-self-center">
+                                        <a class="btn btn-primary" href="#"
+                                            onclick="sendCommand('up'); return false;">
+                                            <i class="bi bi-chevron-double-up"></i>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col align-self-end">
-                                <a class="btn btn-primary" href="#"
-                                    onclick="sendCommand('turnRight'); return false;">
-                                    <i class="bi bi-arrow-counterclockwise"></i>
-                                </a>
+                            <div class="container text-center">
+                                <div class="row">
+                                    <div class="col align-self-start">
+                                        <a class="btn btn-primary" href="#"
+                                            onclick="sendCommand('turnLeft'); return false;">
+                                            <i class="bi bi-arrow-clockwise"></i>
+                                        </a>
+                                    </div>
+                                    <div class="col align-self-end">
+                                        <a class="btn btn-primary" href="#"
+                                            onclick="sendCommand('turnRight'); return false;">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="container text-center">
-                        <div class="row">
-                            <div class="col align-self-center">
-                                <a class="btn btn-primary" href="#"
-                                    onclick="sendCommand('down'); return false;">
-                                    <i class="bi bi-chevron-double-down"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--離陸・着陸-->
-                <div class="col">
-                    <div class="container-fluid">
-                        <div class="container text-center">
-                            <div class="col align-self-center">
-                                <a class="btn btn-primary" href="#"
-                                    onclick="sendCommand('takeOff'); return false;">Take Off</a>
-                            </div>
-                        </div>
-                        <div class="container text-center">
-                            <br>
-                        </div>
-                        <div class="container text-center">
-                            <div class="row">
-                                <div class="col align-self-center">
-                                    <a class="btn btn-primary" href="#"
-                                        onclick="sendCommand('land'); return false;">Land</a>
+                            <div class="container text-center">
+                                <div class="row">
+                                    <div class="col align-self-center">
+                                        <a class="btn btn-primary" href="#"
+                                            onclick="sendCommand('down'); return false;">
+                                            <i class="bi bi-chevron-double-down"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <!--右スティック-->
-                <div class="col">
-                    <div class="container-fluid">
-                        <div class="container text-center">
-                            <div class="row">
-                                <div class="col align-self-center">
-                                    <a class="btn btn-primary" href="#"
-                                        onclick="sendCommand('forward'); return false;">
-                                        <i class="bi bi-arrow-up"></i>
-                                    </a>
+                        <!--右スティック-->
+                        <div class="col">
+                            <div class="container-fluid">
+                                <div class="container text-center">
+                                    <div class="row">
+                                        <div class="col align-self-center">
+                                            <a class="btn btn-primary" href="#"
+                                                onclick="sendCommand('forward'); return false;">
+                                                <i class="bi bi-arrow-up"></i>
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="container text-center">
-                            <div class="row">
-                                <div class="col align-self-start">
-                                    <a class="btn btn-primary" href="#"
-                                        onclick="sendCommand('left'); return false;">
-                                        <i class="bi bi-arrow-left"></i>
-                                    </a>
+                                <div class="container text-center">
+                                    <div class="row">
+                                        <div class="col align-self-start">
+                                            <a class="btn btn-primary" href="#"
+                                                onclick="sendCommand('left'); return false;">
+                                                <i class="bi bi-arrow-left"></i>
+                                            </a>
+                                        </div>
+                                        <div class="col align-self-end">
+                                            <a class="btn btn-primary" href="#"
+                                                onclick="sendCommand('right'); return false;">
+                                                <i class="bi bi-arrow-right"></i>
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col align-self-end">
-                                    <a class="btn btn-primary" href="#"
-                                        onclick="sendCommand('right'); return false;">
-                                        <i class="bi bi-arrow-right"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="container text-center">
-                            <div class="row">
-                                <div class="col align-self-center">
-                                    <a class="btn btn-primary" href="#"
-                                        onclick="sendCommand('back'); return false;">
-                                        <i class="bi bi-arrow-down"></i>
-                                    </a>
+                                <div class="container text-center">
+                                    <div class="row">
+                                        <div class="col align-self-center">
+                                            <a class="btn btn-primary" href="#"
+                                                onclick="sendCommand('back'); return false;">
+                                                <i class="bi bi-arrow-down"></i>
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -122,10 +112,36 @@
                 </div>
             </div>
         </div>
-    </div>
+        <!--Status-->
+        <div class="col">
+            <div class="card mt-3">
+                <h3 class="card-header">Status</h5>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="bi bi-command"></i>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-speedometer"></i>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-thermometer"></i>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-clock"></i>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-battery"></i>
+                        </li>
+                      </ul>
+                </div>
+            </div>
+        </div>
+      </div>
+    
 
-    <div class="card mt-2 p-2">
-        <h3 class="card-header">Drone Camera</h5>
+    <div class="card mt-2">
+        <h3 class="card-header">Drone Camera</h3>
         <div class="card-body">
             <!--ドローンカメラ映像-->
             <img src="/video/streaming">
