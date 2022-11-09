@@ -10,7 +10,7 @@ from typing import Optional, Generator
 import cv2
 import numpy as np
 
-from src.base import Singleton
+from src.models.base import Singleton
 
 
 logger = logging.getLogger(__name__)
