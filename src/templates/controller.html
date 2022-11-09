@@ -19,13 +19,20 @@
             <div class="card mt-3">
                 <h3 class="card-header">Controller</h5>
                 <div class="card-body">
-                    <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
-                        <a class="btn btn-primary" href="#"
-                            onclick="sendCommand('takeOff'); return false;">Take Off</a>
-                        <a class="btn btn-primary" href="#"
-                            onclick="sendCommand('land'); return false;">Land</a>
+                    <div class="row justify-content-between">
+                        <div class="btn-group-vertical col-3" role="group" aria-label="Vertical button group">
+                            <a class="btn btn-primary" href="#"
+                                onclick="sendCommand('takeOff'); return false;">Take Off</a>
+                            <a class="btn btn-primary" href="#"
+                                onclick="sendCommand('land'); return false;">Land</a>
+                        </div>
+                        <a class="col-3" href="#"
+                            onclick="sendCommand('emergency'); return false;">
+                            <font color="red">
+                                <i class="bi bi-exclamation-triangle"></i>Emergency
+                            </font>
+                        </a>
                     </div>
-                    <br>
                     <br>
                     <div class="row">
                         <!--左スティック-->

@@ -10,7 +10,7 @@ from typing import Optional, Generator
 import cv2
 import numpy as np
 
-from src.models.base import Singleton
+from src.base import Singleton
 
 
 logger = logging.getLogger(__name__)
@@ -197,6 +197,10 @@ class DroneManeger(metaclass=Singleton):
     def land(self) -> Optional[str]:
         """着陸させる"""
         return self.send_command('land')
+
+    def emergency(self) -> Optional[str]:
+        """緊急時にすべてのモータを止める"""
+        return self.send_command('emergency')
 
     def move(self, direction: str, distance: float) -> Optional[str]:
         """方向と距離を指定して動かす

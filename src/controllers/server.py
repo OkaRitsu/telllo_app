@@ -44,6 +44,9 @@ def command():
         drone.takeoff()
     elif cmd == 'land':
         drone.land()
+    # 緊急停止
+    elif cmd == 'emergency':
+        drone.emergency()
     # 速度設定
     elif cmd == 'speed':
         speed = request.form.get('speed')
