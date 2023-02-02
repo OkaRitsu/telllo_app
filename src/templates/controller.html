@@ -1,158 +1,144 @@
 {% extends "layout.html" %}
 
-{% block title %}TELLO controller{% endblock %}
+{% block title %}TelloBoard{% endblock %}
 
 {% block content %}
-<script>
-    function sendCommand(command, params={}) {
-        console.log({action: 'sendCommand', command: command, params: params});
-        params['command'] = command;
-        $.post("/api/command/", params).done(function (json) {
-            console.log({action: 'sendCommand', json: json});
-        }, 'json')
-    }
-</script>
 
 <div class="container-fluid">
-    <div class="row align-items-start">
-        <div class="col">
-            <div class="card mt-3">
-                <h3 class="card-header">Controller</h5>
-                <div class="card-body">
-                    <div class="row justify-content-between">
-                        <div class="btn-group-vertical col-3" role="group" aria-label="Vertical button group">
-                            <a class="btn btn-primary" href="#"
-                                onclick="sendCommand('takeOff'); return false;">Take Off</a>
-                            <a class="btn btn-primary" href="#"
-                                onclick="sendCommand('land'); return false;">Land</a>
-                        </div>
-                        <a class="col-3" href="#"
-                            onclick="sendCommand('emergency'); return false;">
-                            <font color="red">
-                                <i class="bi bi-exclamation-triangle"></i>Emergency
-                            </font>
-                        </a>
-                    </div>
-                    <br>
-                    <div class="row">
-                        <!--左スティック-->
-                        <div class="col">
-                            <div class="container-fluid text-center">
-                                <div class="row">
-                                    <div class="col align-self-center">
-                                        <a class="btn btn-primary" href="#"
-                                            onclick="sendCommand('up'); return false;">
-                                            <i class="bi bi-chevron-double-up"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="container text-center">
-                                <div class="row">
-                                    <div class="col align-self-start">
-                                        <a class="btn btn-primary" href="#"
-                                            onclick="sendCommand('turnLeft'); return false;">
-                                            <i class="bi bi-arrow-clockwise"></i>
-                                        </a>
-                                    </div>
-                                    <div class="col align-self-end">
-                                        <a class="btn btn-primary" href="#"
-                                            onclick="sendCommand('turnRight'); return false;">
-                                            <i class="bi bi-arrow-counterclockwise"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="container text-center">
-                                <div class="row">
-                                    <div class="col align-self-center">
-                                        <a class="btn btn-primary" href="#"
-                                            onclick="sendCommand('down'); return false;">
-                                            <i class="bi bi-chevron-double-down"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!--右スティック-->
-                        <div class="col">
-                            <div class="container-fluid">
-                                <div class="container text-center">
-                                    <div class="row">
-                                        <div class="col align-self-center">
-                                            <a class="btn btn-primary" href="#"
-                                                onclick="sendCommand('forward'); return false;">
-                                                <i class="bi bi-arrow-up"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="container text-center">
-                                    <div class="row">
-                                        <div class="col align-self-start">
-                                            <a class="btn btn-primary" href="#"
-                                                onclick="sendCommand('left'); return false;">
-                                                <i class="bi bi-arrow-left"></i>
-                                            </a>
-                                        </div>
-                                        <div class="col align-self-end">
-                                            <a class="btn btn-primary" href="#"
-                                                onclick="sendCommand('right'); return false;">
-                                                <i class="bi bi-arrow-right"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="container text-center">
-                                    <div class="row">
-                                        <div class="col align-self-center">
-                                            <a class="btn btn-primary" href="#"
-                                                onclick="sendCommand('back'); return false;">
-                                                <i class="bi bi-arrow-down"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--Status-->
-        <div class="col">
-            <div class="card mt-3">
-                <h3 class="card-header">Status</h5>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            <i class="bi bi-command"></i>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-speedometer"></i>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-thermometer"></i>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-clock"></i>
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-battery"></i>
-                        </li>
-                      </ul>
-                </div>
-            </div>
-        </div>
-      </div>
-    
+    <div class="row">
+        <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light vh-100 sidebar collapse">
+            <!--サイドバー-->
+            <style>
+                .controller-box {
+                    text-align: center;
+                }
+            </style>
+            
+            <script>
+                function sendCommand(command, params={}) {
+                    console.log({action: 'sendcommand', command: command, params: params})
+                    params['command'] = command
+                    $.post("/api/command/", params).done(function (json) {
+                        console.log({action: 'sendCommand', json: json})
+                    }, 'json')
+                }
 
-    <div class="card mt-2">
-        <h3 class="card-header">Drone Camera</h3>
-        <div class="card-body">
-            <!--ドローンカメラ映像-->
-            <img src="/video/streaming">
-        </div>
+                $(document).on('pageinit', function() {
+                    $('#slider-speed').on("slidestop", function(event) {
+                        let params = {
+                            speed: $("#slider-speed").val(),
+                        }
+                        sendCommand('speed', params)
+                    })
+                })
+            </script>
+            
+            <div class="controller-box pt-4">
+                <h3>Controller</h3>
+            </div>
+            
+            <div class="controller-box">
+                <div class="btn-group py-2" role="group" aria-label="Basic outlined example">
+                    <button type="button" class="btn btn-outline-primary" onclick="sendCommand('takeOff'); return false">Take Off</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="sendCommand('land'); return false">Land</button>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: center;" class="py-2">
+                <table class="text-center">
+                    <td class="px-2">
+                        <div class="text-center">
+                            <div class="ui-nodisc-icon ui-alt-icon">
+                                <button type="button" class="btn btn-outline-primary" onclick="sendCommand('up'); return false;">
+                                    <i class="bi bi-chevron-double-up"></i>
+                                </button>
+                            </div>
+                            <div class="ui-nodisc-icon ui-alt-icon">
+                                <button type="button" class="btn btn-outline-primary" onclick="sendCommand('turnLeft'); return false;">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="sendCommand('turnRight'); return false;">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </button>
+                            </div>
+                            <div class="ui-nodisc-icon ui-alt-icon">
+                                <button type="button" class="btn btn-outline-primary" onclick="sendCommand('down'); return false;">
+                                    <i class="bi bi-chevron-double-down"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+            
+                    <td class="px-2">
+                        <div style="text-align: center;">
+                            <div class="ui-nodisc-icon ui-alt-icon">
+                                <button type="button" class="btn btn-outline-primary" onclick="sendCommand('forward'); return false;">
+                                    <i class="bi bi-arrow-up"></i>
+                                </button>
+                            </div>
+                            <div class="ui-nodisc-icon ui-alt-icon">
+                                <button type="button" class="btn btn-outline-primary" onclick="sendCommand('left'); return false;">
+                                    <i class="bi bi-arrow-left"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="sendCommand('right'); return false;">
+                                    <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                            <div class="ui-nodisc-icon ui-alt-icon">
+                                <button type="button" class="btn btn-outline-primary" onclick="sendCommand('back'); return false;">
+                                    <i class="bi bi-arrow-down"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                </table>
+            </div>
+        </nav>
+        <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="accordion" id="accordionPanelsStayOpenExample">
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                        Status
+                    </button>
+                  </h2>
+                  <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+                    <div class="accordion-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <i class="bi bi-command"></i>
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-speedometer"></i>
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-thermometer"></i>
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-clock"></i>
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-battery"></i>
+                            </li>
+                        </ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+                          Camera
+                      </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+                        <div class="accordion-body">
+                            <!--ドローンカメラ映像-->
+                            <img src="/video/streaming">
+                        </div>
+                    </div>
+                  </div>
+              </div>
+        </main>
     </div>
 </div>
+
 {% endblock %}
