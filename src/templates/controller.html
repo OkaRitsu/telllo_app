@@ -4,6 +4,58 @@
 
 {% block content %}
 
+<script>
+    function update_state() {
+        $.ajax("api/state", {
+            type: "GET"
+        }).done(function(received_data) {
+            var dict = JSON.parse(received_data);
+
+            var battery = dict["bat"] + " %"
+            $("#battery").html(battery);
+
+            var angle = "pitch=" + dict["pitch"] + ", roll=" + dict["roll"] + ", yaw=" + dict["yaw"];
+            $("#angle").html(angle);
+
+            var speed = "x=" + dict["vgx"] + ", y=" + dict["vgy"] + ", z=" + dict["vgz"];
+            $("#speed").html(speed);
+
+            var acceleration = "x=" + dict["agx"] + ", y=" + dict["agy"] + ", z=" + dict["agz"];
+            $("#acceleration").html(acceleration);
+
+            // TODO: 華氏を摂氏に変換
+            var themal = "min=" + dict["templ"] + ", max=" + dict["temph"];
+            $("#themal").html(themal);
+
+            var height = dict["h"] + " cm  (baro: " + dict["baro"] + " cm)";
+            $("#height").html(height);
+
+            var time = dict["time"];
+            $("#time").html(time);
+
+            var tof = dict["tof"] + " cm";
+            $("#tof").html(tof);
+
+
+        }).fail(function() {
+            console.log("Fail");
+        });
+    }
+    
+    window.onload = async function() {
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+        var isBusy = false;
+        while (true) {
+            if (! isBusy) {
+                isBusy = true;
+                update_state();
+                isBusy = false;
+                await sleep(1000);
+            }
+        }
+    };
+</script>
+
 <div class="container-fluid">
     <div class="row">
         <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light vh-100 sidebar collapse">
@@ -121,23 +173,42 @@
                   </h2>
                   <div id="panelsStayOpen-collapseStatus" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingStatus">
                     <div class="accordion-body">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item">
-                                <i class="bi bi-command"></i>
-                            </li>
-                            <li class="list-group-item">
-                                <i class="bi bi-speedometer"></i>
-                            </li>
-                            <li class="list-group-item">
-                                <i class="bi bi-thermometer"></i>
-                            </li>
-                            <li class="list-group-item">
-                                <i class="bi bi-clock"></i>
-                            </li>
-                            <li class="list-group-item">
-                                <i class="bi bi-battery"></i>
-                            </li>
-                        </ul>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th scope="row"><i class="bi bi-battery"></i></th>
+                                    <td><div id="battery"></div></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"></i><i class="bi bi-command"></i></th>
+                                    <td><div id="angle"></div></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><i class="bi bi-speedometer"></i></th>
+                                    <td><div id="speed"></div></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><i class="bi bi-fast-forward-circle"></i></th>
+                                    <td><div id="acceleration"></div></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><i class="bi bi-thermometer"></i></th>
+                                    <td><div id="themal"></div></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><i class="bi bi-arrow-bar-up"></i></th>
+                                    <td><div id="height"></div></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><i class="bi bi-clock"></i></th>
+                                    <td><div id="time"></div></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><i class="bi bi-map"></i></th>
+                                    <td><div id="tof"></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                   </div>
                 </div>
