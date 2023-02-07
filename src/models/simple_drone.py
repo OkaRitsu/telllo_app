@@ -20,8 +20,11 @@ class SimpleDrone(BaseDrone):
 
     def act(self, observations: Dict[str, Union[float, np.array]]) -> None:
         """左右の回転を繰り返す"""
-        self.action_status += 1
         if self.action_status % 2 == 0:
-            self.turn_left()
+            response = self.turn_left()
         else:
-            self.turn_right()
+            response = self.turn_right()
+
+        # レスポンスが返って来ていればカウンターを増やす
+        if response is not None:
+            self.action_status += 1
