@@ -10,6 +10,7 @@ from typing import Generator, Optional
 import cv2
 import numpy as np
 
+from src.controllers.agent import BaselineAgent
 from src.models.base import Singleton
 
 logger = logging.getLogger(__name__)
@@ -72,6 +73,7 @@ class DroneManeger(metaclass=Singleton):
 
         # ビデオを受信するスレッド
         self.video_port = 11111
+        self.frame = None
         self._receive_video_thread = threading.Thread(
             target=self.receive_video,
             args=(self.stop_event, self.proc_stdin, self.host_ip, self.video_port),
@@ -96,6 +98,22 @@ class DroneManeger(metaclass=Singleton):
         self.send_command("command")
         self.send_command("streamon")
         self.set_speed(self.speed)
+
+        # 自律飛行
+        self.agent = BaselineAgent()
+        self.is_autonomous = False
+        self.action_space = [
+            lambda: None,
+            self.forward,
+            self.turn_left,
+            self.turn_right,
+            self.up,
+            self.down,
+        ]
+        self._agent_thread = threading.Thread(
+            target=self.autonomous_flight, args=(self.stop_event,)
+        )
+        self._agent_thread.start()
 
     def __dell__(self) -> None:
         self.stop()
@@ -305,27 +323,17 @@ class DroneManeger(metaclass=Singleton):
                 continue
 
             frame = np.fromstring(frame, np.uint8).reshape(FRAME_Y, FRAME_X, 3)
+            self.frame = frame
 
             yield frame
 
     def video_jpeg_generator(self) -> Generator[np.ndarray, None, None]:
         """画像をjpeg形式にエンコード"""
         for frame in self.video_binary_generator():
-            frame = self._process_frame(frame)
             _, jpeg = cv2.imencode(".jpg", frame)
             jpeg_binary = jpeg.tobytes()
 
             yield jpeg_binary
-
-    def _process_frame(self, frame: np.ndarray) -> np.ndarray:
-        """画像を解析して結果を反映させる
-
-        Atributes:
-            frame: 対象のRGB画像
-        Returns:
-            受け取ったフレームの解析結果
-        """
-        return frame
 
     def receive_state(self, stop_event: threading.Event) -> None:
         """ドローンの速度，高度，バッテリーなどの情報を取得する"""
@@ -350,3 +358,28 @@ class DroneManeger(metaclass=Singleton):
             except socket.error as ex:
                 logger.error({"action": "receive_state", "exception": ex})
                 break
+
+    def enable_autonomous_flight(self) -> None:
+        logger.info(
+            {"action": "enable_autonomous_flight", "state": "AutonomousFlight start"}
+        )
+        self.is_autonomous = True
+
+    def disable_autonous_flight(self) -> None:
+        self.is_autonomous = False
+
+    def autonomous_flight(self, stop_event: threading.Event) -> None:
+        """自律飛行を行う"""
+        while not stop_event.is_set():
+            time.sleep(1)
+            if self.is_autonomous:
+                # 現在の観測を取得
+                observations = self.state
+                observations.update({"frame": self.frame})
+
+                # 観測から次の行動を決定
+                action_idx = self.agent.act(observations)
+                action = self.action_space[action_idx]
+
+                # 行動を実行
+                action()

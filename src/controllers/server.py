@@ -7,6 +7,8 @@ import config
 from src.models.drone_manager import DroneManeger
 
 logger = logging.getLogger(__name__)
+werkzeug_logger = logging.getLogger("werkzeug")
+werkzeug_logger.setLevel(logging.ERROR)
 app = config.app
 
 
@@ -74,6 +76,11 @@ def command():
         drone.turn_left()
     elif cmd == "turnRight":
         drone.turn_right()
+    # 自律飛行
+    elif cmd == "autonomousFlight":
+        drone.enable_autonomous_flight()
+    elif cmd == "stopAutonomousFlight":
+        drone.disable_autonous_flight()
 
     return jsonify(status="success"), 200
 

@@ -145,6 +145,15 @@
                     </td>
                 </table>
             </div>
+            <div class="controller-box mt-3">
+                <h5>ADVANCED MODE</h5>
+                <div data-role="controlgroup" data-type="horizontal">
+                    <div class="btn-group py-2" role="group" aria-label="Basic outlined example">
+                        <button type="button" class="btn btn-outline-primary" onclick="sendCommand('autonomousFlight'); return false">AutoMode</button>
+                        <button type="button" class="btn btn-outline-primary" onclick="sendCommand('stopAutonomousFlight'); return false">Stop</button>
+                    </div>
+                </div>
+            </div>
         </nav>
         <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 py-4">
             <div class="accordion" id="accordionPanelsStayOpen">
