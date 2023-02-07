@@ -5,13 +5,12 @@ import socket
 import subprocess
 import threading
 import time
-from typing import Generator, Optional
+from typing import Dict, Generator, Optional, Union
 
 import cv2
 import numpy as np
 
-from src.controllers.agent import BaselineAgent
-from src.models.base import Singleton
+from src.models.singleton import Singleton
 
 logger = logging.getLogger(__name__)
 
@@ -31,12 +30,12 @@ FRAME_CENTER_Y = FRAME_Y / 2
 
 # ffmpegを使うときのコマンド
 CMD_FFMPEG = (
-    f"ffmpeg -hwaccel auto -hwaccel_device opencl -i pipe:0 "
+    f"ffmpeg -loglevel quiet -hwaccel auto -hwaccel_device opencl -i pipe:0 "
     f"-pix_fmt bgr24 -s {FRAME_X}x{FRAME_Y} -f rawvideo pipe:1"
 )
 
 
-class DroneManeger(metaclass=Singleton):
+class BaseDrone(metaclass=Singleton):
     def __init__(
         self,
         host_ip: str = "192.168.10.2",
@@ -90,30 +89,16 @@ class DroneManeger(metaclass=Singleton):
         )
         self._state_thread.start()
 
-        # コマンドを何個も送らないようにする
-        self._command_semaphore = threading.Semaphore(1)
-        self._command_thread = None
+        # 自律飛行
+        self.autonomous_event = None
+        self.is_autonomous = False
+        self._autonomous_semaphore = threading.Semaphore(1)
+        self._autonomous_thread = None
 
         # ドローンにコマンドを送信する
         self.send_command("command")
         self.send_command("streamon")
         self.set_speed(self.speed)
-
-        # 自律飛行
-        self.agent = BaselineAgent()
-        self.is_autonomous = False
-        self.action_space = [
-            lambda: None,
-            self.forward,
-            self.turn_left,
-            self.turn_right,
-            self.up,
-            self.down,
-        ]
-        self._agent_thread = threading.Thread(
-            target=self.autonomous_flight, args=(self.stop_event,)
-        )
-        self._agent_thread.start()
 
     def __dell__(self) -> None:
         self.stop()
@@ -146,44 +131,26 @@ class DroneManeger(metaclass=Singleton):
 
     def send_command(self, command: str, blocking: bool = True) -> None:
         """ドローンにコマンドを送信し，レスポンスを受け取る"""
-        self._command_thread = threading.Thread(
-            target=self._send_command,
-            args=(
-                command,
-                blocking,
-            ),
-        )
-        self._command_thread.start()
+        logger.info({"action": "send_command", "command": command})
+        self.socket.sendto(command.encode("utf-8"), self.drone_address)
 
-    def _send_command(self, command: str, blocking: bool = True) -> Optional[str]:
-        is_acquire = self._command_semaphore.acquire(blocking=blocking)
-        if is_acquire:
-            with contextlib.ExitStack() as stack:
-                stack.callback(self._command_semaphore.release)
+        # レスポンスを待つ
+        retry = 0
+        while self.response is None:
+            time.sleep(0.3)
+            if retry > 3:
+                break
+            retry += 1
 
-                logger.info({"action": "sendcommand", "command": command})
-
-                # コマンドをエンコードして送信
-                self.socket.sendto(command.encode("utf-8"), self.drone_address)
-
-                # レスポンスを受信
-                retry = 0
-                while self.response is None:
-                    time.sleep(0.3)
-                    if retry > 3:
-                        break
-                    retry += 1
-
-                if self.response is None:
-                    response = None
-                else:
-                    response = self.response.decode("utf-8")
-
-                return response
+        if self.response is None:
+            response = None
         else:
-            logger.warning(
-                {"action": "send_command", "command": command, "status": "not_acquire"}
-            )
+            response = self.response.decode("utf-8")
+
+        # レスポンスを初期化
+        self.response = None
+
+        return response
 
     def takeoff(self) -> Optional[str]:
         """離陸させる"""
@@ -281,10 +248,6 @@ class DroneManeger(metaclass=Singleton):
                 # ソケットから取ってきたデータを格納
                 try:
                     size, addr = sock_video.recvfrom_into(data)
-                    # logger.info({
-                    #     'action': 'receive_video',
-                    #     'data': data,
-                    # })
                 except socket.timeout as ex:
                     logging.warning(
                         {
@@ -350,36 +313,51 @@ class DroneManeger(metaclass=Singleton):
                     k, v = item.split(":")
                     result[k] = float(v)
                 self.state = result
-
-                # logger.info({
-                #     'action': 'receive_state',
-                #     'state': self.state
-                # })
             except socket.error as ex:
                 logger.error({"action": "receive_state", "exception": ex})
                 break
 
-    def enable_autonomous_flight(self) -> None:
-        logger.info(
-            {"action": "enable_autonomous_flight", "state": "AutonomousFlight start"}
-        )
-        self.is_autonomous = True
-
-    def disable_autonous_flight(self) -> None:
-        self.is_autonomous = False
-
-    def autonomous_flight(self, stop_event: threading.Event) -> None:
+    def autonomous_flight(self) -> None:
         """自律飛行を行う"""
-        while not stop_event.is_set():
-            time.sleep(1)
-            if self.is_autonomous:
-                # 現在の観測を取得
-                observations = self.state
-                observations.update({"frame": self.frame})
+        if not self.is_autonomous:
+            self.autonomous_event = threading.Event()
+            self._autonomous_thread = threading.Thread(
+                target=self._autonomous_flight,
+                args=(self._autonomous_semaphore, self.autonomous_event),
+            )
+            self._autonomous_thread.start()
+            self.is_autonomous = True
 
-                # 観測から次の行動を決定
-                action_idx = self.agent.act(observations)
-                action = self.action_space[action_idx]
+    def _autonomous_flight(
+        self, semaphore: threading.Semaphore, stop_event: threading.Event
+    ) -> None:
+        is_acquire = semaphore.acquire(blocking=False)
+        if is_acquire:
+            logger.info({"action": "_autonomous_fligt", "status": "acquire"})
+            with contextlib.ExitStack() as stack:
+                stack.callback(semaphore.release)
+                while not stop_event.is_set():
+                    # 現在の観測を取得
+                    observations = {"frame": self.frame}
+                    observations.update(self.state)
 
-                # 行動を実行
-                action()
+                    # 制御する
+                    self.act(observations)
+        else:
+            logger.warning({"action": "_patrol", "status": "not_acquire"})
+
+    def act(self, observations: Dict[str, Union[float, np.array]]) -> None:
+        """自律飛行の本体"""
+        raise NotImplementedError
+
+    def stop_autonomous_flight(self):
+        """自律飛行を停止する"""
+        if self.is_autonomous:
+            self.autonomous_event.set()
+            retry = 0
+            while self._autonomous_thread.isAlive():
+                time.sleep(0.3)
+                if retry > 300:
+                    break
+                retry += 1
+            self.is_autonomous = False

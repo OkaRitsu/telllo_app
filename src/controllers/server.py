@@ -4,16 +4,19 @@ import logging
 from flask import Response, jsonify, render_template, request
 
 import config
-from src.models.drone_manager import DroneManeger
+from src.models.simple_drone import SimpleDrone
 
 logger = logging.getLogger(__name__)
+
+# Flaskのログを減らす
 werkzeug_logger = logging.getLogger("werkzeug")
 werkzeug_logger.setLevel(logging.ERROR)
+
 app = config.app
 
 
 def get_drone():
-    return DroneManeger()
+    return SimpleDrone()
 
 
 @app.route("/")
@@ -78,9 +81,9 @@ def command():
         drone.turn_right()
     # 自律飛行
     elif cmd == "autonomousFlight":
-        drone.enable_autonomous_flight()
+        drone.autonomous_flight()
     elif cmd == "stopAutonomousFlight":
-        drone.disable_autonous_flight()
+        drone.stop_autonomous_flight()
 
     return jsonify(status="success"), 200
 
